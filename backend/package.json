@@ -7,6 +7,10 @@
   "scripts": {
     "dev": "node --watch src/server.js",
     "start": "node src/server.js",
+    "migrate": "node src/shared/db/migrate.js up",
+    "migrate:down": "node src/shared/db/migrate.js down",
+    "migrate:status": "node src/shared/db/migrate.js status",
+    "seed": "node src/shared/db/seed.js",
     "lint": "eslint ."
   },
   "keywords": [],
