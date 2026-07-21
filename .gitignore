@@ -1,0 +1,8 @@
+node_modules/
+.env
+*.log
+dist/
+
+# Datos académicos personales (no versionar)
+*.pdf
+*.xlsx
