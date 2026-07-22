@@ -9,6 +9,7 @@ import { generateSchedules } from './application/schedules.js'
 import { rankPlans } from './application/ranking.js'
 import { computeCoursePriorities } from './application/coursePriority.js'
 import { recommendAdjustments } from './application/adjustments.js'
+import { buildGraph } from './application/graph.js'
 
 // Agrupa secciones ofertadas por código de curso.
 const groupSectionsByCourse = (offerings) => {
@@ -96,6 +97,30 @@ class MotorService {
         )
         const sectionsByCourse = groupSectionsByCourse(offerings)
         return recommendAdjustments({ eligible, sectionsByCourse, maxCredits, maxShiftSlots }, { desiredCourses, hostCycle })
+    }
+
+    // #36 · Grafo de prerrequisitos del alumno (nodos con estado + aristas) para
+    // visualizar su situación actual en un término.
+    static async getGraph(studentId, termCode) {
+        const term = await MotorRepository.getTerm(termCode)
+        if (!term) throw new NotFoundError(`Término ${termCode} no existe`)
+
+        const [{ remaining }, studentStatus, courses, prerequisites, offerings] = await Promise.all([
+            MotorService.computeRemaining(studentId),
+            MotorRepository.getStudentStatus(studentId),
+            MotorRepository.getCourses(),
+            MotorRepository.getPrerequisites(),
+            MotorRepository.getOfferings(term.id),
+        ])
+        const { eligible } = validateEligibility({ remaining, studentStatus, prerequisites, term, offerings })
+        const priorityByCourse = computeCoursePriorities({ courses, prerequisites, term })
+
+        const remainingCodes = new Set(remaining.map((c) => c.code))
+        const doneSet = new Set(courses.map((c) => c.code).filter((code) => !remainingCodes.has(code)))
+        const enCursoSet = new Set(studentStatus.filter((s) => s.status === 'EN_CURSO').map((s) => s.code))
+        const eligibleSet = new Set(eligible.map((c) => c.code))
+
+        return buildGraph({ courses, prerequisites, doneSet, enCursoSet, eligibleSet, priorityByCourse })
     }
 }
 

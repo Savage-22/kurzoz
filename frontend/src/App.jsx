@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import EstadoPage from './domains/academico/estudiante/pages/EstadoPage.jsx'
 import HorarioPage from './domains/academico/horario/pages/HorarioPage.jsx'
+import GrafoPage from './domains/academico/grafo/pages/GrafoPage.jsx'
 
 const DEFAULT_STUDENT = '2023110208'
 const DEFAULT_OBJETIVOS = {
@@ -25,11 +26,12 @@ function App() {
                 <nav className="flex gap-1 rounded-lg border border-border bg-surface p-1">
                     <Tab active={view === 'estado'} onClick={() => setView('estado')}>Estado y objetivos</Tab>
                     <Tab active={view === 'horario'} onClick={() => setView('horario')}>Horario ideal</Tab>
+                    <Tab active={view === 'grafo'} onClick={() => setView('grafo')}>Mi situación</Tab>
                 </nav>
             </header>
 
             <main>
-                {view === 'estado' ? (
+                {view === 'estado' && (
                     <EstadoPage
                         key={studentId}
                         studentId={studentId}
@@ -37,9 +39,11 @@ function App() {
                         onObjetivosChange={setObjetivos}
                         onGenerate={() => setView('horario')}
                     />
-                ) : (
+                )}
+                {view === 'horario' && (
                     <HorarioPage key={`${studentId}:${JSON.stringify(objetivos)}`} studentId={studentId} objetivos={objetivos} />
                 )}
+                {view === 'grafo' && <GrafoPage key={studentId} studentId={studentId} term={objetivos.term} />}
             </main>
         </div>
     )

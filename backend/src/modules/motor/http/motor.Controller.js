@@ -27,6 +27,17 @@ class MotorController {
         }
     }
 
+    // #36 · GET /students/:id/graph?term=2026-II
+    static async graph(req, res, next) {
+        try {
+            const term = req.query.term || DEFAULT_TERM
+            const data = await MotorService.getGraph(req.params.id, term)
+            res.status(200).json({ success: true, message: 'Grafo de prerrequisitos generado', data })
+        } catch (error) {
+            next(error)
+        }
+    }
+
     // #10 + #11 · POST /students/:id/schedules
     static async schedules(req, res, next) {
         try {
