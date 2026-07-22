@@ -1,56 +1,62 @@
-import { useEffect, useState } from 'react'
-import { getBackendStatus } from './domains/system/health/services/healthService.js'
+import { useState } from 'react'
+import EstadoPage from './domains/academico/estudiante/pages/EstadoPage.jsx'
+import HorarioPage from './domains/academico/horario/pages/HorarioPage.jsx'
 
-function App() {
-  const [status, setStatus] = useState({ loading: true })
-
-  useEffect(() => {
-    let isMounted = true
-    getBackendStatus().then((result) => {
-      if (isMounted) setStatus({ loading: false, ...result })
-    })
-    return () => {
-      isMounted = false
-    }
-  }, [])
-
-  return (
-    <main className="mx-auto flex min-h-svh max-w-2xl flex-col items-center justify-center gap-6 px-6 text-center">
-      <div>
-        <h1 className="text-5xl font-semibold tracking-tight text-primary">Kurzoz</h1>
-        <p className="mt-3 text-gray-500">
-          Planificador de cursos y horarios · Ingeniería de Sistemas UNHEVAL
-        </p>
-      </div>
-
-      <BackendStatus status={status} />
-    </main>
-  )
+const DEFAULT_STUDENT = '2023110208'
+const DEFAULT_OBJETIVOS = {
+    term: '2026-II',
+    maxCredits: 24,
+    chainInProgress: true,
+    weights: { courses: 1000, unlock: 10, comfort: 50 },
 }
 
-function BackendStatus({ status }) {
-  if (status.loading) {
-    return <p className="text-gray-400">Comprobando backend…</p>
-  }
+function App() {
+    const [view, setView] = useState('estado')
+    const [studentId] = useState(DEFAULT_STUDENT)
+    const [objetivos, setObjetivos] = useState(DEFAULT_OBJETIVOS)
 
-  const isOnline = status.online && status.database === 'up'
-  const label = isOnline ? 'Backend y base de datos operativos' : 'Backend sin base de datos'
+    return (
+        <div className="mx-auto flex min-h-svh max-w-6xl flex-col gap-6 px-6 py-8">
+            <header className="flex items-center justify-between">
+                <div>
+                    <h1 className="text-2xl font-semibold tracking-tight text-primary">Kurzoz</h1>
+                    <p className="text-sm text-gray-500">Planificador de horarios · Ingeniería de Sistemas UNHEVAL · {studentId}</p>
+                </div>
+                <nav className="flex gap-1 rounded-lg border border-border bg-surface p-1">
+                    <Tab active={view === 'estado'} onClick={() => setView('estado')}>Estado y objetivos</Tab>
+                    <Tab active={view === 'horario'} onClick={() => setView('horario')}>Horario ideal</Tab>
+                </nav>
+            </header>
 
-  return (
-    <div className="rounded-lg border border-border bg-surface px-5 py-3">
-      <span
-        className={`inline-flex items-center gap-2 text-sm font-medium ${
-          isOnline ? 'text-success' : 'text-error'
-        }`}
-      >
-        <span
-          className={`size-2 rounded-full ${isOnline ? 'bg-success' : 'bg-error'}`}
-          aria-hidden="true"
-        />
-        {label}
-      </span>
-    </div>
-  )
+            <main>
+                {view === 'estado' ? (
+                    <EstadoPage
+                        key={studentId}
+                        studentId={studentId}
+                        objetivos={objetivos}
+                        onObjetivosChange={setObjetivos}
+                        onGenerate={() => setView('horario')}
+                    />
+                ) : (
+                    <HorarioPage key={`${studentId}:${JSON.stringify(objetivos)}`} studentId={studentId} objetivos={objetivos} />
+                )}
+            </main>
+        </div>
+    )
+}
+
+function Tab({ active, onClick, children }) {
+    return (
+        <button
+            type="button"
+            onClick={onClick}
+            className={`rounded-md px-3 py-1.5 text-sm font-medium transition ${
+                active ? 'bg-primary text-white' : 'text-gray-600 hover:text-primary'
+            }`}
+        >
+            {children}
+        </button>
+    )
 }
 
 export default App
