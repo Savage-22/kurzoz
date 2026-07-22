@@ -6,6 +6,7 @@ import { computeRemaining } from './application/remaining.js'
 import { validateEligibility } from './application/eligibility.js'
 import { generateSchedules } from './application/schedules.js'
 import { buildUnlockIndex, rankPlans } from './application/ranking.js'
+import { recommendAdjustments } from './application/adjustments.js'
 
 // Agrupa secciones ofertadas por código de curso.
 const groupSectionsByCourse = (offerings) => {
@@ -68,6 +69,26 @@ class MotorService {
         const unlockByCourse = buildUnlockIndex(prerequisites)
         const ranked = rankPlans(schedules, { weights: options.weights, unlockByCourse })
         return { plans: ranked, ...meta }
+    }
+
+    // #12 · Propone ajustes mínimos (mover bloque / abrir grupo) que permiten
+    // llevar más cursos. No modifica la oferta oficial; son sugerencias.
+    static async recommendAdjustments(studentId, termCode, { desiredCourses = null, maxCredits = 24, chainInProgress = true, maxShiftSlots = 6 } = {}) {
+        const term = await MotorRepository.getTerm(termCode)
+        if (!term) throw new Error(`Término ${termCode} no existe`)
+
+        const [{ remaining }, studentStatus, prerequisites, offerings] = await Promise.all([
+            MotorService.computeRemaining(studentId),
+            MotorRepository.getStudentStatus(studentId),
+            MotorRepository.getPrerequisites(),
+            MotorRepository.getOfferings(term.id),
+        ])
+        const { eligible } = validateEligibility(
+            { remaining, studentStatus, prerequisites, term, offerings },
+            { chainInProgress },
+        )
+        const sectionsByCourse = groupSectionsByCourse(offerings)
+        return recommendAdjustments({ eligible, sectionsByCourse, maxCredits, maxShiftSlots }, { desiredCourses })
     }
 }
 
