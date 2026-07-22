@@ -4,6 +4,11 @@
 import pool from '../../../shared/db/pool.js'
 
 class MotorRepository {
+    static async studentExists(studentId) {
+        const { rowCount } = await pool.query('SELECT 1 FROM student WHERE id = $1 AND is_active = TRUE', [studentId])
+        return rowCount > 0
+    }
+
     // Cursos activos de la malla, con paridad ya derivada.
     static async getCourses() {
         const { rows } = await pool.query(
