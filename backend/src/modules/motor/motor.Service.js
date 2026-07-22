@@ -3,6 +3,7 @@
 // servicio es el único que la consulta.
 import MotorRepository from './infrastructure/motor.Repository.js'
 import { computeRemaining } from './application/remaining.js'
+import { validateEligibility } from './application/eligibility.js'
 
 class MotorService {
     // #7 · Cursos que le faltan al alumno para egresar.
@@ -13,6 +14,20 @@ class MotorService {
             MotorRepository.getEquivalences(),
         ])
         return computeRemaining({ courses, studentStatus, equivalences })
+    }
+
+    // #8 · De los faltantes, cuáles son cursables en el término.
+    static async validateEligibility(studentId, termCode, options = {}) {
+        const term = await MotorRepository.getTerm(termCode)
+        if (!term) throw new Error(`Término ${termCode} no existe`)
+
+        const [{ remaining }, studentStatus, prerequisites, offerings] = await Promise.all([
+            MotorService.computeRemaining(studentId),
+            MotorRepository.getStudentStatus(studentId),
+            MotorRepository.getPrerequisites(),
+            MotorRepository.getOfferings(term.id),
+        ])
+        return validateEligibility({ remaining, studentStatus, prerequisites, term, offerings }, options)
     }
 }
 
