@@ -4,3 +4,5 @@ import httpClient from '../../../../infrastructure/httpClient.js'
 export const postSchedules = (studentId, body) => httpClient.post(`/students/${studentId}/schedules`, body)
 
 export const postAdjustments = (studentId, body) => httpClient.post(`/students/${studentId}/adjustments`, body)
+
+export const postExplanation = (studentId, body) => httpClient.post(`/students/${studentId}/plans/explain`, body)
