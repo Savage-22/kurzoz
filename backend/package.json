@@ -12,6 +12,7 @@
     "migrate:status": "node src/shared/db/migrate.js status",
     "seed": "node src/shared/db/seed.js",
     "malla:seed": "node src/modules/malla/generateSeed.js",
+    "oferta:seed": "node src/modules/oferta/generateSeed.js",
     "import:malla": "node src/modules/malla/importMalla.js",
     "import:avance": "node src/modules/avance/importAvance.js",
     "lint": "eslint ."
