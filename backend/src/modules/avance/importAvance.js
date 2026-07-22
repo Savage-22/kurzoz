@@ -7,24 +7,25 @@ import AvanceService from './application/avance.Service.js'
 
 const DEFAULT_FILE = resolve(process.cwd(), '../Avance curricular.pdf')
 
+const parseList = (arg, prefix) => arg.slice(prefix.length).split(',').map((c) => c.trim()).filter(Boolean)
+
 const parseArgs = (argv) => {
     let filePath = DEFAULT_FILE
     let inProgress = []
+    let approved = []
     for (const arg of argv) {
-        if (arg.startsWith('--en-curso=')) {
-            inProgress = arg.slice('--en-curso='.length).split(',').map((c) => c.trim()).filter(Boolean)
-        } else if (!arg.startsWith('--')) {
-            filePath = resolve(arg)
-        }
+        if (arg.startsWith('--en-curso=')) inProgress = parseList(arg, '--en-curso=')
+        else if (arg.startsWith('--aprobado=')) approved = parseList(arg, '--aprobado=')
+        else if (!arg.startsWith('--')) filePath = resolve(arg)
     }
-    return { filePath, inProgress }
+    return { filePath, inProgress, approved }
 }
 
 const main = async () => {
-    const { filePath, inProgress } = parseArgs(process.argv.slice(2))
+    const { filePath, inProgress, approved } = parseArgs(process.argv.slice(2))
     console.log(`Importando avance desde ${filePath}`)
 
-    const r = await AvanceService.importFromPdf(filePath, { inProgress })
+    const r = await AvanceService.importFromPdf(filePath, { inProgress, approved })
 
     console.log(`\nAlumno: ${r.student.name} (${r.student.id})`)
     console.log(`✓ Cursos:    ${r.total}`)
