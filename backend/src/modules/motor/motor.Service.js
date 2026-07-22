@@ -5,6 +5,7 @@ import MotorRepository from './infrastructure/motor.Repository.js'
 import { computeRemaining } from './application/remaining.js'
 import { validateEligibility } from './application/eligibility.js'
 import { generateSchedules } from './application/schedules.js'
+import { buildUnlockIndex, rankPlans } from './application/ranking.js'
 
 // Agrupa secciones ofertadas por código de curso.
 const groupSectionsByCourse = (offerings) => {
@@ -58,6 +59,15 @@ class MotorService {
         )
         const sectionsByCourse = groupSectionsByCourse(offerings)
         return generateSchedules({ eligible, sectionsByCourse, maxCredits }, { maxResults })
+    }
+
+    // #11 · Genera horarios y los ordena por objetivos (pesos configurables).
+    static async generateRankedPlans(studentId, termCode, options = {}) {
+        const { schedules, ...meta } = await MotorService.generateSchedules(studentId, termCode, options)
+        const prerequisites = await MotorRepository.getPrerequisites()
+        const unlockByCourse = buildUnlockIndex(prerequisites)
+        const ranked = rankPlans(schedules, { weights: options.weights, unlockByCourse })
+        return { plans: ranked, ...meta }
     }
 }
 
