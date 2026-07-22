@@ -34,12 +34,20 @@ cp frontend/.env.example frontend/.env
 # 3. Crear la base de datos
 createdb kurzoz
 
-# 4. Levantar backend + frontend
+# 4. Migrar el esquema y cargar datos (malla, prerrequisitos, equivalencias, términos)
+npm run migrate --workspace backend
+npm run seed --workspace backend
+
+# 5. Levantar backend + frontend
 npm run dev
 ```
 
 - Backend: http://localhost:4000 · healthcheck en `GET /health`.
 - Frontend: http://localhost:5173
+
+> La malla 2026 viene **versionada como seed** (`backend/migrations/seeds/`), así que
+> `npm run seed` deja los 65 cursos en la base **sin necesitar ningún Excel**. El Excel de
+> convalidaciones solo lo usa quien lo tenga para regenerar el seed (`npm run malla:seed`).
 
 ## Scripts (raíz)
 
