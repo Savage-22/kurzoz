@@ -13,7 +13,9 @@ const buildNote = (row) => {
 }
 
 class MallaService {
-    static async importFromExcel(filePath) {
+    // Lee y normaliza la malla desde el Excel SIN tocar la base de datos.
+    // Devuelve las filas listas para persistir o para volcarlas a un seed.
+    static async buildFromExcel(filePath) {
         const rows = await readMallaRows(filePath)
         const report = { courses: 0, prerequisites: 0, equivalences: 0, skipped: [], warnings: [] }
 
@@ -64,18 +66,25 @@ class MallaService {
             }
         }
         const equivalences = [...equivalenceByPair.values()]
-
-        // 4. Persistencia atómica.
         const courses = [...courseByCode.values()]
+
+        report.courses = courses.length
+        report.prerequisites = prerequisites.length
+        report.equivalences = equivalences.length
+        return { courses, prerequisites, equivalences, report }
+    }
+
+    // Importa la malla directamente a la base de datos (herramienta de dev,
+    // opcional). El camino normal es correr el seed versionado; ver malla:seed.
+    static async importFromExcel(filePath) {
+        const { courses, prerequisites, equivalences, report } = await MallaService.buildFromExcel(filePath)
+
         await MallaModel.withTransaction(async (client) => {
             await MallaModel.upsertCourses(client, courses)
             await MallaModel.replacePrerequisites(client, prerequisites)
             await MallaModel.replaceEquivalences(client, equivalences)
         })
 
-        report.courses = courses.length
-        report.prerequisites = prerequisites.length
-        report.equivalences = equivalences.length
         return report
     }
 }

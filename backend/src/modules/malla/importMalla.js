@@ -1,4 +1,6 @@
-// Ejecuta la importación de la malla desde el Excel de convalidaciones.
+// Importa la malla directo del Excel a la base de datos. OPCIONAL: el camino
+// normal para levantar la BD es `npm run seed` (usa el seed versionado). Este
+// atajo sirve solo si tienes el Excel y quieres saltarte regenerar el seed.
 // Uso: node src/modules/malla/importMalla.js [ruta-al-excel]
 import { resolve } from 'node:path'
 import pool from '../../shared/db/pool.js'
