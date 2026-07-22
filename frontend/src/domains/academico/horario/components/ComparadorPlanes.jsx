@@ -39,10 +39,15 @@ function ComparadorPlanes({ plans, selectedIndex, onSelect }) {
                             {/* Desglose por métrica: hace inspeccionable el ranking */}
                             <dl className="mt-3 grid grid-cols-3 gap-2 text-center text-xs">
                                 <Metric label="Cursos" value={plan.breakdown.courses} />
-                                <Metric label="Desbloqueo" value={plan.breakdown.unlock} />
+                                <Metric label="Prioridad" value={plan.breakdown.priority} />
                                 <Metric label="Comodidad" value={plan.breakdown.comfort} />
                             </dl>
 
+                            {plan.breakdown.strategic?.length > 0 && (
+                                <p className="mt-2 rounded bg-primary-soft px-2 py-1 text-[11px] text-primary">
+                                    ★ Abre curso del próximo ciclo: {plan.breakdown.strategic.join(', ')}
+                                </p>
+                            )}
                             {plan.leftOut?.length > 0 && (
                                 <p className="mt-2 text-[11px] text-gray-500">Fuera por choque/cupo: {plan.leftOut.join(', ')}</p>
                             )}
