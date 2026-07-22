@@ -1,4 +1,4 @@
-import { postAdjustments, postSchedules } from '../api/horarioApi.js'
+import { postAdjustments, postExplanation, postSchedules } from '../api/horarioApi.js'
 
 // Genera y rankea horarios (#10/#11). objetivos = { term, maxCredits, chainInProgress, weights }.
 export const generatePlans = async (studentId, objetivos) => {
@@ -9,5 +9,12 @@ export const generatePlans = async (studentId, objetivos) => {
 // Recomendaciones de ajuste (#12) para un conjunto de cursos deseados.
 export const getAdjustments = async (studentId, { term, desiredCourses, maxCredits }) => {
     const { data } = await postAdjustments(studentId, { term, desiredCourses, maxCredits })
+    return data.data
+}
+
+// Explicación (#42) de por qué el plan `planIndex` es una buena elección.
+// Devuelve { plan, explanation, aiAvailable, facts }.
+export const explainPlan = async (studentId, { term, planIndex, maxCredits, chainInProgress, weights }) => {
+    const { data } = await postExplanation(studentId, { term, planIndex, maxCredits, chainInProgress, weights })
     return data.data
 }

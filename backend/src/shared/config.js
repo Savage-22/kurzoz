@@ -9,4 +9,9 @@ export const config = {
         password: process.env.DB_PASSWORD || 'postgres',
         database: process.env.DB_NAME || 'kurzoz',
     },
+    deepseek: {
+        apiKey: process.env.DEEPSEEK_API_KEY || '',
+        model: process.env.DEEPSEEK_MODEL || 'deepseek-chat',
+        baseUrl: process.env.DEEPSEEK_BASE_URL || 'https://api.deepseek.com',
+    },
 }

@@ -36,3 +36,12 @@ export class ConflictError extends DomainError {
         super(message, 409)
     }
 }
+
+// Fallo al contactar un servicio externo (p. ej. la API de DeepSeek). El motor
+// nunca depende de esto para su correctness; quien lo use debe degradar con
+// elegancia si se lanza.
+export class ExternalServiceError extends DomainError {
+    constructor(message) {
+        super(message, 502)
+    }
+}

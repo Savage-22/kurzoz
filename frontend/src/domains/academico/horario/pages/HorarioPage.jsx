@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react'
-import { generatePlans, getAdjustments } from '../services/horarioService.js'
+import { explainPlan, generatePlans, getAdjustments } from '../services/horarioService.js'
 import { applyProposal, detectOverlaps } from '../../shared/horarioUtils.js'
 import GrillaSemanal from '../components/GrillaSemanal.jsx'
 import ComparadorPlanes from '../components/ComparadorPlanes.jsx'
 import RecomendacionesPanel from '../components/RecomendacionesPanel.jsx'
+import ExplicacionPanel from '../components/ExplicacionPanel.jsx'
 
 // #15 + #16 · Comparador de planes, grilla del plan elegido y recomendaciones
 // de ajuste con previsualización sobre la grilla.
@@ -12,6 +13,7 @@ function HorarioPage({ studentId, objetivos }) {
     const [selected, setSelected] = useState(0)
     const [adjust, setAdjust] = useState(null)
     const [applied, setApplied] = useState(null) // { id, proposal }
+    const [explain, setExplain] = useState(null) // { loading, data, error }
 
     // El padre remonta esta página (key por alumno+objetivos), así que el estado
     // arranca en loading y el efecto solo dispara la generación.
@@ -42,6 +44,22 @@ function HorarioPage({ studentId, objetivos }) {
         setApplied(null)
     }
 
+    const explicarHorario = async () => {
+        setExplain({ loading: true })
+        try {
+            const data = await explainPlan(studentId, {
+                term: objetivos.term,
+                planIndex: selected,
+                maxCredits: objetivos.maxCredits,
+                chainInProgress: objetivos.chainInProgress,
+                weights: objetivos.weights,
+            })
+            setExplain({ loading: false, data })
+        } catch (e) {
+            setExplain({ loading: false, error: e.response?.data?.message ?? 'No se pudo generar la explicación' })
+        }
+    }
+
     return (
         <div className="grid gap-6 lg:grid-cols-[340px_1fr]">
             <section>
@@ -53,6 +71,7 @@ function HorarioPage({ studentId, objetivos }) {
                         setSelected(i)
                         setApplied(null)
                         setAdjust(null)
+                        setExplain(null)
                     }}
                 />
             </section>
@@ -87,6 +106,8 @@ function HorarioPage({ studentId, objetivos }) {
                         onReset={() => setApplied(null)}
                     />
                 </div>
+
+                <ExplicacionPanel state={explain} onExplain={explicarHorario} />
             </section>
         </div>
     )
