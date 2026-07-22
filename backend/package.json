@@ -15,6 +15,7 @@
     "oferta:seed": "node src/modules/oferta/generateSeed.js",
     "import:malla": "node src/modules/malla/importMalla.js",
     "import:avance": "node src/modules/avance/importAvance.js",
+    "reconcile": "node src/modules/reconciliacion/reconcile.js",
     "lint": "eslint ."
   },
   "keywords": [],
