@@ -18,7 +18,7 @@ const EARLY_MIN = 420 // 07:00: empezar antes se penaliza
 const LONG_DAY_MIN = 480 // 8 h de span en un día se considera sobrecarga
 
 // Comodidad en (0,1]: 1 = sin huecos, sin madrugadas, días equilibrados.
-const comfortScore = (sections) => {
+export const comfortScore = (sections) => {
     const byDay = new Map()
     for (const section of sections) {
         for (const s of section.sessions) {
