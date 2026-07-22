@@ -14,9 +14,11 @@ class AvanceService {
     }
 
     // Importa el avance a la base para un alumno.
-    // inProgress: códigos que el alumno cursa ahora (2026-I) y que en el avance
-    // figuran sin nota; se marcan EN_CURSO en vez de PENDIENTE.
-    static async importFromPdf(filePath, { inProgress = [] } = {}) {
+    // approved: códigos que el alumno YA aprobó pero que el PDF (foto vieja) aún
+    //   muestra sin nota; se fuerzan a APROBADO. Corrige el desfase del avance.
+    // inProgress: códigos que el alumno cursa ahora y que en el avance figuran
+    //   sin nota; se marcan EN_CURSO en vez de PENDIENTE.
+    static async importFromPdf(filePath, { inProgress = [], approved = [] } = {}) {
         const parsed = await AvanceService.buildFromPdf(filePath)
         const report = { warnings: [], skipped: [] }
 
@@ -27,6 +29,7 @@ class AvanceService {
         // Integridad: todo curso del avance debe existir en la malla cargada.
         const known = new Set((await pool.query('SELECT code FROM course')).rows.map((r) => r.code))
         const inProgressSet = new Set(inProgress)
+        const approvedSet = new Set(approved)
 
         const courses = []
         let computedApprovedCredits = 0
@@ -36,7 +39,9 @@ class AvanceService {
                 continue
             }
             let status = course.status
-            if (status === 'PENDIENTE' && inProgressSet.has(course.code)) status = 'EN_CURSO'
+            // El override de aprobados gana sobre lo que dice el PDF.
+            if (approvedSet.has(course.code)) status = 'APROBADO'
+            else if (status === 'PENDIENTE' && inProgressSet.has(course.code)) status = 'EN_CURSO'
             if (status === 'APROBADO') computedApprovedCredits += course.credits
 
             courses.push({ code: course.code, status, grade: course.grade, modality: null })

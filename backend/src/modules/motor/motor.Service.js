@@ -6,7 +6,8 @@ import MotorRepository from './infrastructure/motor.Repository.js'
 import { computeRemaining } from './application/remaining.js'
 import { validateEligibility } from './application/eligibility.js'
 import { generateSchedules } from './application/schedules.js'
-import { buildUnlockIndex, rankPlans } from './application/ranking.js'
+import { rankPlans } from './application/ranking.js'
+import { computeCoursePriorities } from './application/coursePriority.js'
 import { recommendAdjustments } from './application/adjustments.js'
 
 // Agrupa secciones ofertadas por código de curso.
@@ -47,14 +48,16 @@ class MotorService {
         return validateEligibility({ remaining, studentStatus, prerequisites, term, offerings }, options)
     }
 
-    // #10 · Horarios válidos (sin choques) que maximizan cursos dentro del tope.
-    static async generateSchedules(studentId, termCode, { maxCredits = 24, chainInProgress = false, maxResults = 10 } = {}) {
+    // #10 · Horarios válidos (sin choques) que maximizan cursos dentro del tope,
+    // conservando también planes de casi-máxima cantidad con cursos estratégicos.
+    static async generateSchedules(studentId, termCode, { maxCredits = 24, chainInProgress = false, maxResults = 12, slack = 1 } = {}) {
         const term = await MotorRepository.getTerm(termCode)
         if (!term) throw new NotFoundError(`Término ${termCode} no existe`)
 
-        const [{ remaining }, studentStatus, prerequisites, offerings] = await Promise.all([
+        const [{ remaining }, studentStatus, courses, prerequisites, offerings] = await Promise.all([
             MotorService.computeRemaining(studentId),
             MotorRepository.getStudentStatus(studentId),
+            MotorRepository.getCourses(),
             MotorRepository.getPrerequisites(),
             MotorRepository.getOfferings(term.id),
         ])
@@ -63,15 +66,15 @@ class MotorService {
             { chainInProgress },
         )
         const sectionsByCourse = groupSectionsByCourse(offerings)
-        return generateSchedules({ eligible, sectionsByCourse, maxCredits }, { maxResults })
+        const priorityByCourse = computeCoursePriorities({ courses, prerequisites, term })
+        const result = generateSchedules({ eligible, sectionsByCourse, maxCredits, priorityByCourse }, { maxResults, slack })
+        return { ...result, priorityByCourse }
     }
 
     // #11 · Genera horarios y los ordena por objetivos (pesos configurables).
     static async generateRankedPlans(studentId, termCode, options = {}) {
-        const { schedules, ...meta } = await MotorService.generateSchedules(studentId, termCode, options)
-        const prerequisites = await MotorRepository.getPrerequisites()
-        const unlockByCourse = buildUnlockIndex(prerequisites)
-        const ranked = rankPlans(schedules, { weights: options.weights, unlockByCourse })
+        const { schedules, priorityByCourse, ...meta } = await MotorService.generateSchedules(studentId, termCode, options)
+        const ranked = rankPlans(schedules, { weights: options.weights, priorityByCourse })
         return { plans: ranked, ...meta }
     }
 

@@ -37,7 +37,7 @@ function ObjetivosForm({ objetivos, onChange, onGenerate }) {
                 <legend className="text-xs font-semibold uppercase tracking-wide text-gray-500">Pesos de los objetivos</legend>
                 {[
                     { key: 'courses', label: 'Cantidad de cursos' },
-                    { key: 'unlock', label: 'Desbloqueo (cuellos de botella)' },
+                    { key: 'priority', label: 'Prioridad (correlativos / cuellos de botella)' },
                     { key: 'comfort', label: 'Comodidad de horario' },
                 ].map(({ key, label }) => (
                     <label key={key} className="text-sm">

@@ -6,8 +6,8 @@ const DEFAULT_STUDENT = '2023110208'
 const DEFAULT_OBJETIVOS = {
     term: '2026-II',
     maxCredits: 24,
-    chainInProgress: true,
-    weights: { courses: 1000, unlock: 10, comfort: 50 },
+    chainInProgress: false,
+    weights: { courses: 1000, priority: 6, comfort: 40 },
 }
 
 function App() {
