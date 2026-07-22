@@ -12,7 +12,10 @@
     "migrate:status": "node src/shared/db/migrate.js status",
     "seed": "node src/shared/db/seed.js",
     "malla:seed": "node src/modules/malla/generateSeed.js",
+    "oferta:seed": "node src/modules/oferta/generateSeed.js",
     "import:malla": "node src/modules/malla/importMalla.js",
+    "import:avance": "node src/modules/avance/importAvance.js",
+    "reconcile": "node src/modules/reconciliacion/reconcile.js",
     "lint": "eslint ."
   },
   "keywords": [],
@@ -23,6 +26,7 @@
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "morgan": "^1.10.0",
+    "pdfjs-dist": "^4.10.38",
     "pg": "^8.13.1"
   },
   "devDependencies": {
