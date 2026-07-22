@@ -54,8 +54,12 @@ export const detectOverlaps = (sections) => {
 export const applyProposal = (sections, proposal) => {
     if (!proposal) return sections
     if (proposal.type === 'NUEVO_GRUPO') {
-        const { startMin, endMin } = parseRange(proposal.to)
-        return [...sections, { courseCode: proposal.course, groupLabel: proposal.group, sessions: [{ day: proposal.day, startMin, endMin }], nuevo: true }]
+        // El bloque nuevo puede tener varias sesiones (HT+HP); si vienen, se pintan
+        // todas. Fallback a una sola sesión para compatibilidad con propuestas viejas.
+        const sessions = proposal.sessions?.length
+            ? proposal.sessions.map((s) => ({ day: s.day, startMin: s.startMin, endMin: s.endMin }))
+            : [{ day: proposal.day, ...parseRange(proposal.to) }]
+        return [...sections, { courseCode: proposal.course, groupLabel: proposal.group, sessions, nuevo: true }]
     }
     // MOVER: corre el bloque del curso en el día indicado, de `from` a `to`.
     const from = parseRange(proposal.from)
