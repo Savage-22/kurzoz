@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { explainPlan, generatePlans, getAdjustments } from '../services/horarioService.js'
 import { applyProposal, detectOverlaps } from '../../shared/horarioUtils.js'
 import GrillaSemanal from '../components/GrillaSemanal.jsx'
@@ -14,6 +14,8 @@ function HorarioPage({ studentId, objetivos }) {
     const [adjust, setAdjust] = useState(null)
     const [applied, setApplied] = useState(null) // { id, proposal }
     const [explain, setExplain] = useState(null) // { loading, data, error }
+    const [exporting, setExporting] = useState(false)
+    const gridRef = useRef(null)
 
     // El padre remonta esta página (key por alumno+objetivos), así que el estado
     // arranca en loading y el efecto solo dispara la generación.
@@ -42,6 +44,20 @@ function HorarioPage({ studentId, objetivos }) {
         const result = await getAdjustments(studentId, { term: objetivos.term, desiredCourses, maxCredits: objetivos.maxCredits })
         setAdjust(result)
         setApplied(null)
+    }
+
+    const exportar = async (formato) => {
+        if (!gridRef.current) return
+        setExporting(true)
+        try {
+            // Carga diferida: jsPDF/html-to-image solo se descargan al exportar.
+            const { exportarPdf, exportarPng } = await import('../services/exportHorario.js')
+            const base = `horario-${studentId}-plan${selected + 1}`
+            if (formato === 'png') await exportarPng(gridRef.current, `${base}.png`)
+            else await exportarPdf(gridRef.current, { filename: `${base}.pdf`, titulo: `Kurzoz · Horario ${objetivos.term} · Plan ${selected + 1} · ${studentId}` })
+        } finally {
+            setExporting(false)
+        }
     }
 
     const explicarHorario = async () => {
@@ -83,9 +99,32 @@ function HorarioPage({ studentId, objetivos }) {
                             Grilla · Plan {selected + 1}
                             {applied && <span className="ml-2 text-xs font-normal text-accent">(previsualización de ajuste)</span>}
                         </h2>
-                        {conflicted.size > 0 && <span className="text-xs font-medium text-error">choques resaltados</span>}
+                        <div className="flex items-center gap-2">
+                            {conflicted.size > 0 && <span className="text-xs font-medium text-error">choques resaltados</span>}
+                            <button
+                                type="button"
+                                onClick={() => exportar('png')}
+                                disabled={exporting}
+                                className="rounded border border-primary px-2 py-1 text-xs font-medium text-primary hover:bg-primary hover:text-white disabled:opacity-50"
+                            >
+                                PNG
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => exportar('pdf')}
+                                disabled={exporting}
+                                className="rounded border border-primary px-2 py-1 text-xs font-medium text-primary hover:bg-primary hover:text-white disabled:opacity-50"
+                            >
+                                PDF
+                            </button>
+                        </div>
                     </div>
-                    <GrillaSemanal sections={displayedSections} conflictedCodes={conflicted} />
+                    <div ref={gridRef} className="bg-background">
+                        <p className="mb-2 text-[11px] text-gray-500">
+                            Kurzoz · {studentId} · {objetivos.term} · Plan {selected + 1}
+                        </p>
+                        <GrillaSemanal sections={displayedSections} conflictedCodes={conflicted} />
+                    </div>
                 </div>
 
                 <div className="rounded-lg border border-border bg-background p-4">
