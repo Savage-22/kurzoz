@@ -16,6 +16,14 @@ class DisponibilidadModel {
         return rows.map((r) => r.teacher)
     }
 
+    // Todas las ventanas activas (para el optimizador institucional).
+    static async listAll() {
+        const { rows } = await pool.query(
+            `SELECT ${SELECT_WINDOW} FROM teacher_availability WHERE is_active = TRUE ORDER BY teacher, day, start_min`,
+        )
+        return rows
+    }
+
     static async listByTeacher(teacher) {
         const { rows } = await pool.query(
             `SELECT ${SELECT_WINDOW} FROM teacher_availability
