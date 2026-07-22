@@ -45,9 +45,12 @@ npm run dev
 - Backend: http://localhost:4000 · healthcheck en `GET /health`.
 - Frontend: http://localhost:5173
 
-> La malla 2026 viene **versionada como seed** (`backend/migrations/seeds/`), así que
-> `npm run seed` deja los 65 cursos en la base **sin necesitar ningún Excel**. El Excel de
-> convalidaciones solo lo usa quien lo tenga para regenerar el seed (`npm run malla:seed`).
+> La malla 2026 y el horario oficial 2026-II vienen **versionados como seed**
+> (`backend/migrations/seeds/`), así que `npm run seed` deja los 65 cursos y la oferta en la
+> base **sin necesitar ningún archivo fuente**. El Excel de convalidaciones y el PDF de la
+> Resolución solo los usa quien los tenga para regenerar los seeds (`npm run malla:seed`,
+> `npm run oferta:seed`). El avance curricular es dato personal: cada alumno carga el suyo
+> con `npm run import:avance -- <pdf>`.
 
 ## Scripts (raíz)
 
