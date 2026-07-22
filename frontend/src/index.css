@@ -10,6 +10,16 @@
   --color-border: #e5e4e7;
   --color-success: #16a34a;
   --color-error: #dc2626;
+  --color-warning: #d97706;
+  --color-warning-soft: #fef3c7;
+
+  /* Paleta estable para pintar cursos en la grilla semanal */
+  --color-course-1: #7c3aed;
+  --color-course-2: #2563eb;
+  --color-course-3: #059669;
+  --color-course-4: #d97706;
+  --color-course-5: #db2777;
+  --color-course-6: #0891b2;
 
   --font-sans: system-ui, 'Segoe UI', Roboto, sans-serif;
 }
