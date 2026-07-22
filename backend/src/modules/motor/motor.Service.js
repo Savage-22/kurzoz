@@ -80,7 +80,7 @@ class MotorService {
 
     // #12 · Propone ajustes mínimos (mover bloque / abrir grupo) que permiten
     // llevar más cursos. No modifica la oferta oficial; son sugerencias.
-    static async recommendAdjustments(studentId, termCode, { desiredCourses = null, maxCredits = 24, chainInProgress = true, maxShiftSlots = 6 } = {}) {
+    static async recommendAdjustments(studentId, termCode, { desiredCourses = null, hostCycle = null, maxCredits = 24, chainInProgress = true, maxShiftSlots = 6 } = {}) {
         const term = await MotorRepository.getTerm(termCode)
         if (!term) throw new NotFoundError(`Término ${termCode} no existe`)
 
@@ -95,7 +95,7 @@ class MotorService {
             { chainInProgress },
         )
         const sectionsByCourse = groupSectionsByCourse(offerings)
-        return recommendAdjustments({ eligible, sectionsByCourse, maxCredits, maxShiftSlots }, { desiredCourses })
+        return recommendAdjustments({ eligible, sectionsByCourse, maxCredits, maxShiftSlots }, { desiredCourses, hostCycle })
     }
 }
 

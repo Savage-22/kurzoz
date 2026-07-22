@@ -19,13 +19,18 @@ function RecomendacionesPanel({ result, appliedId, onApply, onReset }) {
             {proposals.map((p, i) => {
                 const applied = appliedId === i
                 const isMove = p.type === 'MOVER'
+                const isComfort = p.motive === 'CONFORT'
                 return (
                     <div key={i} className={`rounded-lg border p-3 ${applied ? 'border-primary bg-primary-soft' : 'border-border bg-surface'}`}>
                         <div className="flex items-center justify-between">
                             <span className={`rounded px-1.5 py-0.5 text-[10px] font-semibold text-white ${isMove ? 'bg-accent' : 'bg-primary'}`}>
                                 {isMove ? 'MOVER' : 'GRUPO NUEVO'}
                             </span>
-                            <span className="text-xs font-semibold text-success">+{p.gain} curso{p.gain > 1 ? 's' : ''} → {baselineCourses + p.gain}</span>
+                            {isComfort ? (
+                                <span className="text-xs font-semibold text-accent">↑ comodidad (sin cambiar cursos)</span>
+                            ) : (
+                                <span className="text-xs font-semibold text-success">+{p.gain} curso{p.gain > 1 ? 's' : ''} → {baselineCourses + p.gain}</span>
+                            )}
                         </div>
                         <p className="mt-1.5 text-sm text-gray-700">
                             <span className="font-semibold">{p.course}</span>
