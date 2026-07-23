@@ -3,6 +3,7 @@ import EstadoPage from './domains/academico/estudiante/pages/EstadoPage.jsx'
 import HorarioPage from './domains/academico/horario/pages/HorarioPage.jsx'
 import GrafoPage from './domains/academico/grafo/pages/GrafoPage.jsx'
 import DireccionDisponibilidadPage from './domains/direccion/disponibilidad/pages/DireccionDisponibilidadPage.jsx'
+import DireccionPlanificadorPage from './domains/direccion/planificador/pages/DireccionPlanificadorPage.jsx'
 
 const DEFAULT_STUDENT = '2023110208'
 const DEFAULT_OBJETIVOS = {
@@ -29,6 +30,7 @@ function App() {
                     <Tab active={view === 'horario'} onClick={() => setView('horario')}>Horario ideal</Tab>
                     <Tab active={view === 'grafo'} onClick={() => setView('grafo')}>Mi situación</Tab>
                     <Tab active={view === 'disponibilidad'} onClick={() => setView('disponibilidad')}>Disponibilidad</Tab>
+                    <Tab active={view === 'planificador'} onClick={() => setView('planificador')}>Planificador</Tab>
                 </nav>
             </header>
 
@@ -47,6 +49,7 @@ function App() {
                 )}
                 {view === 'grafo' && <GrafoPage key={studentId} studentId={studentId} term={objetivos.term} />}
                 {view === 'disponibilidad' && <DireccionDisponibilidadPage />}
+                {view === 'planificador' && <DireccionPlanificadorPage />}
             </main>
         </div>
     )
