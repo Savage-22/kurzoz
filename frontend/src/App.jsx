@@ -2,6 +2,8 @@ import { useState } from 'react'
 import EstadoPage from './domains/academico/estudiante/pages/EstadoPage.jsx'
 import HorarioPage from './domains/academico/horario/pages/HorarioPage.jsx'
 import GrafoPage from './domains/academico/grafo/pages/GrafoPage.jsx'
+import DireccionDisponibilidadPage from './domains/direccion/disponibilidad/pages/DireccionDisponibilidadPage.jsx'
+import DireccionPlanificadorPage from './domains/direccion/planificador/pages/DireccionPlanificadorPage.jsx'
 
 const DEFAULT_STUDENT = '2023110208'
 const DEFAULT_OBJETIVOS = {
@@ -27,16 +29,12 @@ function App() {
                         Planificador de horarios · Ingeniería de Sistemas UNHEVAL · {studentId}
                     </p>
                 </div>
-                <nav className="flex gap-1 rounded-xl border border-border bg-surface p-1 shadow-sm">
-                    <Tab active={view === 'estado'} onClick={() => setView('estado')}>
-                        Estado y objetivos
-                    </Tab>
-                    <Tab active={view === 'horario'} onClick={() => setView('horario')}>
-                        Horario ideal
-                    </Tab>
-                    <Tab active={view === 'grafo'} onClick={() => setView('grafo')}>
-                        Mi situación
-                    </Tab>
+                <nav className="flex gap-1 rounded-lg border border-border bg-surface p-1">
+                    <Tab active={view === 'estado'} onClick={() => setView('estado')}>Estado y objetivos</Tab>
+                    <Tab active={view === 'horario'} onClick={() => setView('horario')}>Horario ideal</Tab>
+                    <Tab active={view === 'grafo'} onClick={() => setView('grafo')}>Mi situación</Tab>
+                    <Tab active={view === 'disponibilidad'} onClick={() => setView('disponibilidad')}>Disponibilidad</Tab>
+                    <Tab active={view === 'planificador'} onClick={() => setView('planificador')}>Planificador</Tab>
                 </nav>
             </header>
 
@@ -60,6 +58,9 @@ function App() {
                 {view === 'grafo' && (
                     <GrafoPage key={studentId} studentId={studentId} term={objetivos.term} />
                 )}
+                {view === 'grafo' && <GrafoPage key={studentId} studentId={studentId} term={objetivos.term} />}
+                {view === 'disponibilidad' && <DireccionDisponibilidadPage />}
+                {view === 'planificador' && <DireccionPlanificadorPage />}
             </main>
 
             <footer className="border-t border-border py-4 text-center text-xs text-text-muted">
