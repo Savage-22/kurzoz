@@ -19,11 +19,15 @@ function App() {
     const [objetivos, setObjetivos] = useState(DEFAULT_OBJETIVOS)
 
     return (
-        <div className="mx-auto flex min-h-svh max-w-6xl flex-col gap-6 px-6 py-8">
-            <header className="flex items-center justify-between">
+        <div className="mx-auto flex min-h-svh max-w-7xl flex-col gap-8 px-4 py-6 sm:px-6 lg:px-8">
+            <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                    <h1 className="text-2xl font-semibold tracking-tight text-primary">Kurzoz</h1>
-                    <p className="text-sm text-gray-500">Planificador de horarios · Ingeniería de Sistemas UNHEVAL · {studentId}</p>
+                    <h1 className="text-2xl font-bold tracking-tight text-primary sm:text-3xl">
+                        Kurzoz
+                    </h1>
+                    <p className="mt-1 text-sm text-text-secondary">
+                        Planificador de horarios · Ingeniería de Sistemas UNHEVAL · {studentId}
+                    </p>
                 </div>
                 <nav className="flex gap-1 rounded-lg border border-border bg-surface p-1">
                     <Tab active={view === 'estado'} onClick={() => setView('estado')}>Estado y objetivos</Tab>
@@ -34,7 +38,7 @@ function App() {
                 </nav>
             </header>
 
-            <main>
+            <main className="flex-1">
                 {view === 'estado' && (
                     <EstadoPage
                         key={studentId}
@@ -45,12 +49,23 @@ function App() {
                     />
                 )}
                 {view === 'horario' && (
-                    <HorarioPage key={`${studentId}:${JSON.stringify(objetivos)}`} studentId={studentId} objetivos={objetivos} />
+                    <HorarioPage
+                        key={`${studentId}:${JSON.stringify(objetivos)}`}
+                        studentId={studentId}
+                        objetivos={objetivos}
+                    />
+                )}
+                {view === 'grafo' && (
+                    <GrafoPage key={studentId} studentId={studentId} term={objetivos.term} />
                 )}
                 {view === 'grafo' && <GrafoPage key={studentId} studentId={studentId} term={objetivos.term} />}
                 {view === 'disponibilidad' && <DireccionDisponibilidadPage />}
                 {view === 'planificador' && <DireccionPlanificadorPage />}
             </main>
+
+            <footer className="border-t border-border py-4 text-center text-xs text-text-muted">
+                Kurzoz © 2026 · Planificador académico para UNHEVAL
+            </footer>
         </div>
     )
 }
@@ -60,8 +75,10 @@ function Tab({ active, onClick, children }) {
         <button
             type="button"
             onClick={onClick}
-            className={`rounded-md px-3 py-1.5 text-sm font-medium transition ${
-                active ? 'bg-primary text-white' : 'text-gray-600 hover:text-primary'
+            className={`rounded-lg px-4 py-2 text-sm font-medium transition-all duration-200 ${
+                active
+                    ? 'bg-primary text-white shadow-md'
+                    : 'text-text-secondary hover:bg-surface-hover hover:text-primary'
             }`}
         >
             {children}

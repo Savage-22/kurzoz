@@ -23,25 +23,63 @@ function HorarioPage({ studentId, objetivos }) {
         let mounted = true
         generatePlans(studentId, objetivos)
             .then((data) => mounted && setState({ loading: false, data }))
-            .catch((e) => mounted && setState({ loading: false, error: e.response?.data?.message ?? 'No se pudieron generar horarios' }))
+            .catch(
+                (e) =>
+                    mounted &&
+                    setState({
+                        loading: false,
+                        error: e.response?.data?.message ?? 'No se pudieron generar horarios',
+                    }),
+            )
         return () => {
             mounted = false
         }
     }, [studentId, objetivos])
 
-    if (state.loading) return <p className="text-gray-400">Generando horarios…</p>
-    if (state.error) return <p className="text-error">{state.error}</p>
+    if (state.loading) {
+        return (
+            <div className="flex items-center justify-center py-16">
+                <div className="text-center">
+                    <div className="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-2 border-primary border-t-transparent"></div>
+                    <p className="text-sm font-medium text-text-secondary">Generando horarios…</p>
+                    <p className="mt-1 text-xs text-text-muted">Analizando opciones óptimas</p>
+                </div>
+            </div>
+        )
+    }
+
+    if (state.error) {
+        return (
+            <div className="rounded-xl border border-error-soft bg-error-soft p-6 text-center">
+                <p className="text-sm font-medium text-error">{state.error}</p>
+            </div>
+        )
+    }
 
     const plans = state.data.plans
-    if (plans.length === 0) return <p className="text-gray-500">No hay horarios posibles con estos objetivos.</p>
+    if (plans.length === 0) {
+        return (
+            <div className="rounded-xl border border-border bg-surface p-8 text-center">
+                <p className="text-sm text-text-secondary">
+                    No hay horarios posibles con estos objetivos.
+                </p>
+            </div>
+        )
+    }
 
     const plan = plans[selected]
     const displayedSections = applyProposal(plan.sections, applied?.proposal)
     const conflicted = detectOverlaps(displayedSections)
 
     const buscarAjustes = async () => {
-        const desiredCourses = [...plan.courses.map((c) => c.code), ...plan.leftOut].filter((c) => /^\d{4}$/.test(c))
-        const result = await getAdjustments(studentId, { term: objetivos.term, desiredCourses, maxCredits: objetivos.maxCredits })
+        const desiredCourses = [...plan.courses.map((c) => c.code), ...plan.leftOut].filter(
+            (c) => /^\d{4}$/.test(c),
+        )
+        const result = await getAdjustments(studentId, {
+            term: objetivos.term,
+            desiredCourses,
+            maxCredits: objetivos.maxCredits,
+        })
         setAdjust(result)
         setApplied(null)
     }
@@ -54,7 +92,11 @@ function HorarioPage({ studentId, objetivos }) {
             const { exportarPdf, exportarPng } = await import('../services/exportHorario.js')
             const base = `horario-${studentId}-plan${selected + 1}`
             if (formato === 'png') await exportarPng(gridRef.current, `${base}.png`)
-            else await exportarPdf(gridRef.current, { filename: `${base}.pdf`, titulo: `Kurzoz · Horario ${objetivos.term} · Plan ${selected + 1} · ${studentId}` })
+            else
+                await exportarPdf(gridRef.current, {
+                    filename: `${base}.pdf`,
+                    titulo: `Kurzoz · Horario ${objetivos.term} · Plan ${selected + 1} · ${studentId}`,
+                })
         } finally {
             setExporting(false)
         }
@@ -72,14 +114,22 @@ function HorarioPage({ studentId, objetivos }) {
             })
             setExplain({ loading: false, data })
         } catch (e) {
-            setExplain({ loading: false, error: e.response?.data?.message ?? 'No se pudo generar la explicación' })
+            setExplain({
+                loading: false,
+                error: e.response?.data?.message ?? 'No se pudo generar la explicación',
+            })
         }
     }
 
     return (
-        <div className="grid gap-6 lg:grid-cols-[340px_1fr]">
+        <div className="grid gap-6 lg:grid-cols-[380px_1fr]">
             <section>
-                <h2 className="mb-3 text-sm font-semibold text-gray-800">Planes candidatos ({plans.length})</h2>
+                <h2 className="mb-4 text-lg font-semibold text-text-primary">
+                    Planes candidatos
+                    <span className="ml-2 text-sm font-normal text-text-muted">
+                        ({plans.length})
+                    </span>
+                </h2>
                 <ComparadorPlanes
                     plans={plans}
                     selectedIndex={selected}
@@ -92,20 +142,28 @@ function HorarioPage({ studentId, objetivos }) {
                 />
             </section>
 
-            <section className="flex flex-col gap-4">
-                <div className="rounded-lg border border-border bg-background p-4">
-                    <div className="mb-2 flex items-center justify-between">
-                        <h2 className="text-sm font-semibold text-gray-800">
+            <section className="flex flex-col gap-5">
+                <div className="rounded-xl border border-border bg-surface p-5 shadow-sm">
+                    <div className="mb-4 flex items-center justify-between">
+                        <h2 className="text-lg font-semibold text-text-primary">
                             Grilla · Plan {selected + 1}
-                            {applied && <span className="ml-2 text-xs font-normal text-accent">(previsualización de ajuste)</span>}
+                            {applied && (
+                                <span className="ml-2 text-xs font-normal text-accent">
+                                    (previsualización de ajuste)
+                                </span>
+                            )}
                         </h2>
                         <div className="flex items-center gap-2">
-                            {conflicted.size > 0 && <span className="text-xs font-medium text-error">choques resaltados</span>}
+                            {conflicted.size > 0 && (
+                                <span className="rounded-full bg-error-soft px-2.5 py-1 text-xs font-medium text-error">
+                                    choques resaltados
+                                </span>
+                            )}
                             <button
                                 type="button"
                                 onClick={() => exportar('png')}
                                 disabled={exporting}
-                                className="rounded border border-primary px-2 py-1 text-xs font-medium text-primary hover:bg-primary hover:text-white disabled:opacity-50"
+                                className="rounded-lg border border-primary bg-primary-soft px-3 py-1.5 text-xs font-semibold text-primary transition-colors hover:bg-primary hover:text-white disabled:opacity-50"
                             >
                                 PNG
                             </button>
@@ -113,27 +171,29 @@ function HorarioPage({ studentId, objetivos }) {
                                 type="button"
                                 onClick={() => exportar('pdf')}
                                 disabled={exporting}
-                                className="rounded border border-primary px-2 py-1 text-xs font-medium text-primary hover:bg-primary hover:text-white disabled:opacity-50"
+                                className="rounded-lg border border-primary bg-primary-soft px-3 py-1.5 text-xs font-semibold text-primary transition-colors hover:bg-primary hover:text-white disabled:opacity-50"
                             >
                                 PDF
                             </button>
                         </div>
                     </div>
-                    <div ref={gridRef} className="bg-background">
-                        <p className="mb-2 text-[11px] text-gray-500">
+                    <div ref={gridRef} className="rounded-lg border border-border bg-background p-3">
+                        <p className="mb-3 text-[11px] font-medium text-text-muted">
                             Kurzoz · {studentId} · {objetivos.term} · Plan {selected + 1}
                         </p>
                         <GrillaSemanal sections={displayedSections} conflictedCodes={conflicted} />
                     </div>
                 </div>
 
-                <div className="rounded-lg border border-border bg-background p-4">
-                    <div className="mb-2 flex items-center justify-between">
-                        <h2 className="text-sm font-semibold text-gray-800">¿Llevar más cursos? Ajustes de horario</h2>
+                <div className="rounded-xl border border-border bg-surface p-5 shadow-sm">
+                    <div className="mb-4 flex items-center justify-between">
+                        <h2 className="text-lg font-semibold text-text-primary">
+                            Ajustes de horario
+                        </h2>
                         <button
                             type="button"
                             onClick={buscarAjustes}
-                            className="rounded-lg bg-accent px-3 py-1.5 text-xs font-semibold text-white hover:bg-primary"
+                            className="rounded-lg bg-accent px-4 py-2 text-xs font-semibold text-white shadow-sm transition-all hover:bg-accent-hover hover:shadow-md"
                         >
                             Buscar ajustes
                         </button>
