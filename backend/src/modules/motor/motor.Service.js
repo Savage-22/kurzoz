@@ -79,15 +79,17 @@ class MotorService {
         return { plans: ranked, ...meta }
     }
 
-    // #12 · Propone ajustes mínimos (mover bloque / abrir grupo) que permiten
-    // llevar más cursos. No modifica la oferta oficial; son sugerencias.
+    // #12 + #39 · Propone ajustes mínimos (mover bloque / abrir grupo) que permiten
+    // llevar más cursos. No modifica la oferta oficial; son sugerencias. Rankea
+    // por prioridad estratégica y genera solicitud presentable.
     static async recommendAdjustments(studentId, termCode, { desiredCourses = null, hostCycle = null, maxCredits = 24, chainInProgress = true, maxShiftSlots = 6 } = {}) {
         const term = await MotorRepository.getTerm(termCode)
         if (!term) throw new NotFoundError(`Término ${termCode} no existe`)
 
-        const [{ remaining }, studentStatus, prerequisites, offerings] = await Promise.all([
+        const [{ remaining }, studentStatus, courses, prerequisites, offerings] = await Promise.all([
             MotorService.computeRemaining(studentId),
             MotorRepository.getStudentStatus(studentId),
+            MotorRepository.getCourses(),
             MotorRepository.getPrerequisites(),
             MotorRepository.getOfferings(term.id),
         ])
@@ -96,7 +98,8 @@ class MotorService {
             { chainInProgress },
         )
         const sectionsByCourse = groupSectionsByCourse(offerings)
-        return recommendAdjustments({ eligible, sectionsByCourse, maxCredits, maxShiftSlots }, { desiredCourses, hostCycle })
+        const priorityByCourse = computeCoursePriorities({ courses, prerequisites, term })
+        return recommendAdjustments({ eligible, sectionsByCourse, maxCredits, maxShiftSlots, priorityByCourse }, { desiredCourses, hostCycle })
     }
 
     // #36 · Grafo de prerrequisitos del alumno (nodos con estado + aristas) para

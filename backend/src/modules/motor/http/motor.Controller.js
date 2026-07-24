@@ -1,6 +1,7 @@
 // Controllers del motor: orquestan (leen params/body, llaman al service, arman
 // el sobre) y delegan errores con next(). Sin lógica de negocio.
 import MotorService from '../motor.Service.js'
+import { formatSolicitud } from '../application/adjustments.js'
 
 const DEFAULT_TERM = '2026-II'
 
@@ -49,12 +50,24 @@ class MotorController {
         }
     }
 
-    // #12 · POST /students/:id/adjustments
+    // #12 + #39 · POST /students/:id/adjustments
     static async adjustments(req, res, next) {
         try {
             const { term = DEFAULT_TERM, ...options } = req.body ?? {}
             const data = await MotorService.recommendAdjustments(req.params.id, term, options)
             res.status(200).json({ success: true, message: 'Recomendaciones de ajuste generadas', data })
+        } catch (error) {
+            next(error)
+        }
+    }
+
+    // #39 · POST /students/:id/adjustments/solicitud
+    static async solicitudAjustes(req, res, next) {
+        try {
+            const { term = DEFAULT_TERM, studentName, ...options } = req.body ?? {}
+            const data = await MotorService.recommendAdjustments(req.params.id, term, options)
+            const solicitud = formatSolicitud(data, { studentName, termCode: term })
+            res.status(200).json({ success: true, message: 'Solicitud de ajustes generada', data: solicitud })
         } catch (error) {
             next(error)
         }
