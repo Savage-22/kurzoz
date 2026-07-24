@@ -10,5 +10,6 @@ router.get('/:id/eligible', MotorController.eligible)
 router.get('/:id/graph', MotorController.graph)
 router.post('/:id/schedules', validateScheduleBody, MotorController.schedules)
 router.post('/:id/adjustments', validateAdjustmentBody, MotorController.adjustments)
+router.post('/:id/adjustments/solicitud', validateAdjustmentBody, MotorController.solicitudAjustes)
 
 export default router

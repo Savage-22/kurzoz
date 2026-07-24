@@ -1,4 +1,4 @@
-// #12 + #38 + #41 · Recomendador de ajustes de horario. Puro y NO modifica la
+// #12 + #38 + #41 + #39 · Recomendador de ajustes de horario. Puro y NO modifica la
 // oferta oficial: trabaja sobre secciones clonadas. Ante un set de cursos
 // deseados que cruza ciclos, separa un "host" (el ciclo que aporta más cursos
 // deseados, con grupo ÚNICO que lleva toda su cohorte → bloques INMOVIBLES) de
@@ -13,6 +13,9 @@
 // cursables) y los de CONFORT (#41: no cambian la cantidad pero mejoran la
 // comodidad — menos huecos, madrugadas, días sobrecargados). El host se infiere
 // automáticamente pero se puede sobrescribir manualmente.
+// #39: El ranking de propuestas integra prioridad estratégica (cursos que abren
+// cursos del próximo ciclo o que son cuellos de botella) y genera una solicitud
+// presentable para aprobación de la facultad.
 import { generateSchedules } from './schedules.js'
 import { rangesOverlap } from './conflicts.js'
 import { comfortScore } from './ranking.js'
@@ -113,9 +116,10 @@ const nuevoGrupoProposal = (code, template, sessions, extra) => ({
 })
 
 export const recommendAdjustments = (
-    { eligible, sectionsByCourse, maxCredits = 24, maxShiftSlots = 6 },
+    { eligible, sectionsByCourse, maxCredits = 24, maxShiftSlots = 6, priorityByCourse = new Map() },
     { desiredCourses = null, hostCycle: hostCycleOverride = null } = {},
 ) => {
+    const priorityOf = (code) => priorityByCourse.get(code)?.score ?? 0
     const courses = desiredCourses ? eligible.filter((c) => desiredCourses.includes(c.code)) : eligible
     const codes = courses.map((c) => c.code)
     const baseMap = submap(sectionsByCourse, codes)
@@ -228,8 +232,75 @@ export const recommendAdjustments = (
 
     // Primero los que suben cursos (por ganancia), luego los de confort (por
     // mejora de comodidad); a igualdad, el de menor disrupción/corrimiento.
+    // #39: Se integra la prioridad estratégica de los cursos involucrados en
+    // cada propuesta. Un ajuste que habilite un curso estratégico (que abre
+    // cursos del próximo ciclo o es cuello de botella) rankea más alto que uno
+    // que agregue un electivo sin dependientes.
+    for (const p of proposals) {
+        p.strategicPriority = priorityOf(p.course)
+    }
     proposals.sort(
-        (a, b) => b.gain - a.gain || (b.comfortGain || 0) - (a.comfortGain || 0) || a.disruption - b.disruption || Math.abs(a.shiftSlots || 0) - Math.abs(b.shiftSlots || 0),
+        (a, b) =>
+            b.gain - a.gain ||
+            (b.comfortGain || 0) - (a.comfortGain || 0) ||
+            b.strategicPriority - a.strategicPriority ||
+            a.disruption - b.disruption ||
+            Math.abs(a.shiftSlots || 0) - Math.abs(b.shiftSlots || 0),
     )
     return { baselineCourses: baseMax, baseComfort: Number(baseComfort.toFixed(3)), hostCycle, hostCourses, visitorCourses, proposals }
+}
+
+// #39 · Solicitud presentable: formatea las propuestas de ajuste en un
+// documento estructurado para que la facultad/dirección pueda aprobar o
+// rechazar cada una. Incluye justificación, impacto y pasos a seguir.
+export const formatSolicitud = (adjustmentResult, { studentName, termCode } = {}) => {
+    const { baselineCourses, baseComfort, hostCycle, hostCourses, visitorCourses, proposals } = adjustmentResult
+    const strategicProposals = proposals.filter((p) => p.strategicPriority > 0)
+    const comfortProposals = proposals.filter((p) => p.motive === 'CONFORT')
+    const quantityProposals = proposals.filter((p) => p.motive === 'CANTIDAD')
+
+    const title = `Solicitud de Ajuste de Horario — ${studentName || 'Estudiante'} — ${termCode || 'Término actual'}`
+    const subtitle = `Ciclo host: ${hostCycle} | Cursos base: ${baselineCourses} | Comodidad base: ${baseComfort}`
+
+    const summary = {
+        totalProposals: proposals.length,
+        quantityAdjustments: quantityProposals.length,
+        comfortAdjustments: comfortProposals.length,
+        strategicAdjustments: strategicProposals.length,
+    }
+
+    const formattedProposals = proposals.map((p, i) => {
+        const justification = []
+        if (p.gain > 0) justification.push(`Permite cursar ${p.gain} curso(s) adicional(es)`)
+        if (p.comfortGain > 0) justification.push(`Mejora la comodidad en ${p.comfortGain}`)
+        if (p.strategicPriority > 0) justification.push(`Prioridad estratégica: ${p.strategicPriority}`)
+        justification.push(`Tipo: ${p.type} (${p.motive})`)
+        justification.push(`Disrupción: ${p.disruption}`)
+
+        return {
+            order: i + 1,
+            type: p.type,
+            course: p.course,
+            group: p.group,
+            from: p.from,
+            to: p.to,
+            sessions: p.sessions,
+            motive: p.motive,
+            gain: p.gain,
+            comfortGain: p.comfortGain,
+            strategicPriority: p.strategicPriority,
+            justification: justification.join('; '),
+            note: p.note,
+        }
+    })
+
+    return {
+        title,
+        subtitle,
+        summary,
+        hostCycle,
+        hostCourses,
+        visitorCourses,
+        proposals: formattedProposals,
+    }
 }
