@@ -27,3 +27,21 @@ export const previewAvance = (studentId, file) => {
         headers: { 'Content-Type': 'multipart/form-data' },
     })
 }
+
+// Upload de historial de notas (PDF)
+export const uploadHistorial = (studentId, file) => {
+    const formData = new FormData()
+    formData.append('pdf', file)
+    return httpClient.post(`/students/${studentId}/historial`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+    })
+}
+
+// Preview del historial de notas (sin persistir)
+export const previewHistorial = (studentId, file) => {
+    const formData = new FormData()
+    formData.append('pdf', file)
+    return httpClient.post(`/students/${studentId}/historial/preview`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+    })
+}

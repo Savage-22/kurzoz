@@ -5,6 +5,7 @@ import asistenteRoutes from './asistente/http/asistente.routes.js'
 import disponibilidadRoutes from './disponibilidad/http/disponibilidad.routes.js'
 import planificadorRoutes from './planificador/http/planificador.routes.js'
 import avanceRoutes from './avance/http/avance.routes.js'
+import historialRoutes from './historial/http/historial.routes.js'
 
 export const registerModules = (app) => {
     app.use('/health', healthRoutes)
@@ -12,6 +13,7 @@ export const registerModules = (app) => {
     app.use('/students', reconciliacionRoutes)
     app.use('/students', asistenteRoutes)
     app.use('/students', avanceRoutes)
+    app.use('/students', historialRoutes)
     app.use('/disponibilidad', disponibilidadRoutes)
     app.use('/planificador', planificadorRoutes)
 }
