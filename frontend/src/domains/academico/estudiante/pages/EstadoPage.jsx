@@ -3,33 +3,66 @@ import { getDiscrepancies, getRemaining } from '../services/estudianteService.js
 import FaltantesList from '../components/FaltantesList.jsx'
 import ObjetivosForm from '../components/ObjetivosForm.jsx'
 import DiscrepanciasAviso from '../components/DiscrepanciasAviso.jsx'
+import AvanceUpload from '../components/AvanceUpload.jsx'
 
 // #14 · Estado curricular del alumno + configuración de objetivos.
 function EstadoPage({ studentId, objetivos, onObjetivosChange, onGenerate }) {
     const [remaining, setRemaining] = useState(null)
     const [discrepancias, setDiscrepancias] = useState(null)
     const [error, setError] = useState(null)
+    const [showUpload, setShowUpload] = useState(false)
+
+    const loadData = () => {
+        getRemaining(studentId)
+            .then((data) => {
+                setRemaining(data)
+                setError(null)
+            })
+            .catch((e) => setError(e.response?.data?.message ?? 'No se pudo cargar el estado'))
+        getDiscrepancies(studentId).then((data) => setDiscrepancias(data))
+    }
 
     // El padre remonta por alumno (key), así que el estado arranca vacío y el
     // efecto solo carga; no hace falta resetear de forma síncrona.
     useEffect(() => {
-        let mounted = true
-        getRemaining(studentId)
-            .then((data) => mounted && setRemaining(data))
-            .catch((e) => mounted && setError(e.response?.data?.message ?? 'No se pudo cargar el estado'))
-        getDiscrepancies(studentId).then((data) => mounted && setDiscrepancias(data))
-        return () => {
-            mounted = false
-        }
+        loadData()
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [studentId])
 
     return (
         <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
             <section className="flex flex-col gap-4">
                 {discrepancias && <DiscrepanciasAviso data={discrepancias} />}
+
+                <div className="flex items-center justify-between">
+                    <h2 className="text-lg font-semibold text-text-primary">
+                        Estado académico
+                    </h2>
+                    <button
+                        type="button"
+                        onClick={() => setShowUpload(!showUpload)}
+                        className="rounded-lg border border-primary bg-primary-soft px-4 py-2 text-xs font-semibold text-primary transition-colors hover:bg-primary hover:text-white"
+                    >
+                        {showUpload ? 'Cerrar' : 'Importar avance'}
+                    </button>
+                </div>
+
+                {showUpload && (
+                    <AvanceUpload
+                        studentId={studentId}
+                        onImported={() => {
+                            loadData()
+                            setShowUpload(false)
+                        }}
+                    />
+                )}
+
                 {error ? (
                     <div className="rounded-xl border border-error-soft bg-error-soft p-4">
                         <p className="text-sm font-medium text-error">{error}</p>
+                        <p className="mt-2 text-xs text-text-secondary">
+                            Si eres un alumno nuevo, importa tu avance curricular para comenzar.
+                        </p>
                     </div>
                 ) : (
                     <FaltantesList data={remaining} />
