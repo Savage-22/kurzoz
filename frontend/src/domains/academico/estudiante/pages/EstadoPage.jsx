@@ -24,15 +24,27 @@ function EstadoPage({ studentId, objetivos, onObjetivosChange, onGenerate }) {
     }, [studentId])
 
     return (
-        <div className="grid gap-6 md:grid-cols-[1fr_320px]">
+        <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
             <section className="flex flex-col gap-4">
                 {discrepancias && <DiscrepanciasAviso data={discrepancias} />}
-                {error ? <p className="text-sm text-error">{error}</p> : <FaltantesList data={remaining} />}
+                {error ? (
+                    <div className="rounded-xl border border-error-soft bg-error-soft p-4">
+                        <p className="text-sm font-medium text-error">{error}</p>
+                    </div>
+                ) : (
+                    <FaltantesList data={remaining} />
+                )}
             </section>
 
-            <aside className="h-fit rounded-lg border border-border bg-background p-4">
-                <h2 className="mb-3 text-sm font-semibold text-gray-800">Objetivos del horario</h2>
-                <ObjetivosForm objetivos={objetivos} onChange={onObjetivosChange} onGenerate={onGenerate} />
+            <aside className="h-fit rounded-xl border border-border bg-surface p-6 shadow-sm">
+                <h2 className="mb-4 text-lg font-semibold text-text-primary">
+                    Objetivos del horario
+                </h2>
+                <ObjetivosForm
+                    objetivos={objetivos}
+                    onChange={onObjetivosChange}
+                    onGenerate={onGenerate}
+                />
             </aside>
         </div>
     )

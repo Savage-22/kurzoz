@@ -5,7 +5,11 @@ import { DAYS, SLOT, courseBg, timeBounds, toHHMM } from '../../shared/horarioUt
 // Cada sesión se ubica por grid-row según sus minutos.
 function GrillaSemanal({ sections, conflictedCodes = new Set() }) {
     if (!sections || sections.length === 0) {
-        return <p className="text-sm text-gray-400">Sin sesiones para mostrar.</p>
+        return (
+            <div className="flex items-center justify-center py-8">
+                <p className="text-sm text-text-muted">Sin sesiones para mostrar.</p>
+            </div>
+        )
     }
 
     const { min, max } = timeBounds(sections)
@@ -19,18 +23,23 @@ function GrillaSemanal({ sections, conflictedCodes = new Set() }) {
     return (
         <div className="overflow-x-auto">
             <div
-                className="grid min-w-[640px] gap-px rounded-lg border border-border bg-border"
+                className="grid min-w-[640px] gap-px rounded-xl border border-border bg-border"
                 style={{
-                    gridTemplateColumns: `56px repeat(${DAYS.length}, 1fr)`,
-                    gridTemplateRows: `28px repeat(${rows}, 22px)`,
+                    gridTemplateColumns: `60px repeat(${DAYS.length}, 1fr)`,
+                    gridTemplateRows: `32px repeat(${rows}, 24px)`,
                 }}
             >
                 {/* Esquina + cabecera de días */}
-                <div className="bg-surface" style={{ gridColumn: 1, gridRow: 1 }} />
+                <div
+                    className="flex items-center justify-center bg-surface text-xs font-bold uppercase tracking-wider text-text-muted"
+                    style={{ gridColumn: 1, gridRow: 1 }}
+                >
+                    Hora
+                </div>
                 {DAYS.map((d, i) => (
                     <div
                         key={d.n}
-                        className="flex items-center justify-center bg-surface text-xs font-semibold text-gray-600"
+                        className="flex items-center justify-center bg-surface text-xs font-bold uppercase tracking-wider text-text-muted"
                         style={{ gridColumn: i + 2, gridRow: 1 }}
                     >
                         {d.label}
@@ -41,7 +50,7 @@ function GrillaSemanal({ sections, conflictedCodes = new Set() }) {
                 {hourLabels.map(({ r, label }) => (
                     <div
                         key={`h${r}`}
-                        className="flex items-start justify-end bg-background pr-1 pt-0.5 text-[10px] text-gray-400"
+                        className="flex items-start justify-end bg-background pr-2 pt-1 text-[10px] font-medium text-text-muted"
                         style={{ gridColumn: 1, gridRow: `${r + 2} / span 2` }}
                     >
                         {label}
@@ -49,7 +58,11 @@ function GrillaSemanal({ sections, conflictedCodes = new Set() }) {
                 ))}
                 {DAYS.map((d, i) =>
                     Array.from({ length: rows }, (_, r) => (
-                        <div key={`c${d.n}-${r}`} className="bg-background" style={{ gridColumn: i + 2, gridRow: r + 2 }} />
+                        <div
+                            key={`c${d.n}-${r}`}
+                            className="bg-background"
+                            style={{ gridColumn: i + 2, gridRow: r + 2 }}
+                        />
                     )),
                 )}
 
@@ -62,13 +75,18 @@ function GrillaSemanal({ sections, conflictedCodes = new Set() }) {
                         return (
                             <div
                                 key={`${section.courseCode}-${section.groupLabel}-${k}`}
-                                className={`m-px flex flex-col justify-center rounded px-1 py-0.5 text-[10px] leading-tight text-white ${courseBg(section.courseCode)} ${
-                                    inConflict ? 'ring-2 ring-error ring-offset-1' : ''
+                                className={`m-px flex flex-col justify-center rounded-lg px-1.5 py-1 text-[10px] leading-tight text-white shadow-sm ${courseBg(section.courseCode)} ${
+                                    inConflict
+                                        ? 'ring-2 ring-error ring-offset-1 shadow-md'
+                                        : ''
                                 }`}
-                                style={{ gridColumn: dayIndex + 2, gridRow: `${rowOf(se.startMin) + 2} / ${rowOf(se.endMin) + 2}` }}
+                                style={{
+                                    gridColumn: dayIndex + 2,
+                                    gridRow: `${rowOf(se.startMin) + 2} / ${rowOf(se.endMin) + 2}`,
+                                }}
                                 title={`${section.courseCode} · ${toHHMM(se.startMin)}-${toHHMM(se.endMin)}${se.room ? ` · ${se.room}` : ''}`}
                             >
-                                <span className="font-semibold">{section.courseCode}</span>
+                                <span className="font-bold">{section.courseCode}</span>
                                 <span className="opacity-90">{toHHMM(se.startMin)}</span>
                             </div>
                         )
