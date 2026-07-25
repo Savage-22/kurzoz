@@ -1,9 +1,13 @@
 import { Router } from 'express'
 import MotorController from './motor.Controller.js'
 import { validateAdjustmentBody, validateScheduleBody } from './motor.validation.js'
+import { authenticate, authorizeStudentAccess } from '../../auth/middleware/auth.middleware.js'
 
 // Rutas del motor colgadas de /students/:id.
 const router = Router()
+
+router.use('/:id/*', authenticate, authorizeStudentAccess)
+router.use('/:id', authenticate, authorizeStudentAccess)
 
 router.get('/:id/remaining', MotorController.remaining)
 router.get('/:id/eligible', MotorController.eligible)
