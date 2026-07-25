@@ -2,9 +2,9 @@
 // desglose semestre a semestre del alumno. Puro: sin I/O ni base de datos.
 
 const CODE_CELL = /^(\d{4})\s+(.+)$/       // "1101 CALCULO DIFERENCIAL"
-const CREDITS = /^\d+\.\d{2}$/             // "4.00"
-const GRADE = /^\d{1,2}$/                  // "11" (0..20)
-const GRADE_TEXT = /^\d+\s+\w+$/           // "11 ONCE", "13 TRECE"
+const CREDITS = /^\d+(?:[.,]\d{1,2})?$/    // "4.00", "4,00" o "4"
+const GRADE = /^\d{1,2}(?:[.,]\d+)?$/      // "11", "11.0" o "11,0"
+const GRADE_TEXT = /^\d{1,2}(?:[.,]\d+)?\s+\w+$/  // "11 ONCE", "15,0 ONCE"
 const DATE = /^\d{2}\/\d{2}\/\d{4}$/       // "31/07/2023"
 const STUDENT = /^(.+?)\s*\((\d{6,})\)$/   // "APELLIDOS NOMBRES (2023110208)"
 const SEMESTER = /^AÑO ACADÉMICO:\s*(\d{4})\s*-\s*(I{1,3}|IV|V)$/i  // "AÑO ACADÉMICO: 2023 - I"
@@ -20,10 +20,18 @@ const MODALITY_KEYWORDS = {
     'PASANTIA': 'CONVALIDACION POR PASANTIA',
 }
 
+// Convierte texto numérico a Number normalizando coma decimal.
+const toNumber = (text) => {
+    if (!text) return null
+    const normalized = text.replace(',', '.')
+    const n = Number(normalized)
+    return Number.isNaN(n) ? null : n
+}
+
 // Extrae el número de nota de texto como "11 ONCE" → 11
 const extractGrade = (text) => {
     if (!text) return null
-    const m = text.match(/^(\d{1,2})\s/)
+    const m = text.match(/^(\d{1,2})(?:[.,]\d+)?\s/)
     if (!m) return null
     const n = Number(m[1])
     return n >= 0 && n <= 20 ? n : null
@@ -59,13 +67,13 @@ const parseCourseRow = (cells) => {
         return Object.keys(MODALITY_KEYWORDS).some((k) => upper.includes(k))
     })
 
-    const grade = gradeCell ? Number(gradeCell.text) : (gradeTextCell ? extractGrade(gradeTextCell.text) : null)
+    const grade = gradeCell ? toNumber(gradeCell.text) : (gradeTextCell ? extractGrade(gradeTextCell.text) : null)
 
     return {
         code,
         name: inlineName.trim(),
         group: groupCell?.text ?? null,
-        credits: creditsCell ? Number(creditsCell.text) : null,
+        credits: creditsCell ? toNumber(creditsCell.text) : null,
         grade,
         gradeText: gradeTextCell?.text ?? (grade !== null ? `${grade}` : null),
         date: dateCell?.text ?? null,

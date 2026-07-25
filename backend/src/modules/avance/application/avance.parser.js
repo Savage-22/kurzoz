@@ -3,11 +3,19 @@
 // el curso está APROBADO; si no, PENDIENTE.
 
 const CODE_CELL = /^(\d{4})\s+(.+)$/       // "1101 CIENCIAS MATEMÁTICAS"
-const CREDITS = /^\d+\.\d{2}$/             // "6.00"
-const GRADE = /^\d{1,2}$/                  // "15" (0..20)
+const CREDITS = /^\d+(?:[.,]\d{1,2})?$/    // "6.00", "6,00" o "6"
+const GRADE = /^\d{1,2}(?:[.,]\d+)?$/      // "15", "15.0" o "15,0"
 const DATE = /^\d{2}\/\d{2}\/\d{4}$/       // "11/12/2023"
 const STUDENT = /^(.+?)\s*\((\d{6,})\)$/   // "APELLIDOS NOMBRES (2023110208)"
 const TYPE = { OBLIGATORIO: 'OBL', ELECTIVO: 'ELEC' }
+
+// Convierte texto numérico a Number normalizando coma decimal.
+const toNumber = (text) => {
+    if (!text) return null
+    const normalized = text.replace(',', '.')
+    const n = Number(normalized)
+    return Number.isNaN(n) ? null : n
+}
 
 // Extrae un curso de una fila, o null si la fila no es un curso (encabezado de
 // año, resumen, etc.). Distingue índice (antes del código) de nota (después).
@@ -20,15 +28,15 @@ const parseCourseRow = (cells) => {
     const after = sorted.slice(codeIndex + 1)
 
     const creditsCell = after.find((c) => CREDITS.test(c.text))
-    const gradeCell = after.find((c) => GRADE.test(c.text) && Number(c.text) <= 20)
+    const gradeCell = after.find((c) => GRADE.test(c.text))
     const dateCell = after.find((c) => DATE.test(c.text))
     const typeCell = after.find((c) => TYPE[c.text.toUpperCase()])
 
-    const grade = gradeCell ? Number(gradeCell.text) : null
+    const grade = gradeCell ? toNumber(gradeCell.text) : null
     return {
         code,
         name: inlineName.trim(),
-        credits: creditsCell ? Number(creditsCell.text) : null,
+        credits: creditsCell ? toNumber(creditsCell.text) : null,
         grade,
         date: dateCell ? dateCell.text : null,
         type: typeCell ? TYPE[typeCell.text.toUpperCase()] : null,
