@@ -3,13 +3,15 @@ import { config } from '../config.js'
 
 const { Pool } = pg
 
-const pool = new Pool({
-    host: config.db.host,
-    port: config.db.port,
-    user: config.db.user,
-    password: config.db.password,
-    database: config.db.database,
-})
+const pool = config.db.databaseUrl
+    ? new Pool({ connectionString: config.db.databaseUrl })
+    : new Pool({
+          host: config.db.host,
+          port: config.db.port,
+          user: config.db.user,
+          password: config.db.password,
+          database: config.db.database,
+      })
 
 // Un error en un cliente inactivo del pool no es recuperable: mejor caer fuerte
 pool.on('error', (error) => {

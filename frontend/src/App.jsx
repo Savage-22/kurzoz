@@ -1,11 +1,10 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import EstadoPage from './domains/academico/estudiante/pages/EstadoPage.jsx'
 import HorarioPage from './domains/academico/horario/pages/HorarioPage.jsx'
 import GrafoPage from './domains/academico/grafo/pages/GrafoPage.jsx'
 import DireccionDisponibilidadPage from './domains/direccion/disponibilidad/pages/DireccionDisponibilidadPage.jsx'
 import DireccionPlanificadorPage from './domains/direccion/planificador/pages/DireccionPlanificadorPage.jsx'
 
-const DEFAULT_STUDENT = '2023110208'
 const DEFAULT_OBJETIVOS = {
     term: '2026-II',
     maxCredits: 24,
@@ -14,9 +13,49 @@ const DEFAULT_OBJETIVOS = {
 }
 
 function App() {
+    const [user, setUserState] = useState(null)
+    const [loading, setLoading] = useState(() => !!getToken())
     const [view, setView] = useState('estado')
-    const [studentId] = useState(DEFAULT_STUDENT)
     const [objetivos, setObjetivos] = useState(DEFAULT_OBJETIVOS)
+
+    useEffect(() => {
+        const token = getToken()
+        if (!token) return
+        fetchMe()
+            .then(({ data }) => {
+                if (data.success) {
+                    setUserState(data.data.user)
+                    setUser(data.data.user)
+                }
+            })
+            .catch(() => clearSession())
+            .finally(() => setLoading(false))
+    }, [])
+
+    const handleAuth = (userData) => {
+        setUserState(userData)
+        setUser(userData)
+    }
+
+    const handleLogout = () => {
+        clearSession()
+        setUserState(null)
+        setView('estado')
+    }
+
+    if (loading) {
+        return (
+            <div className="flex min-h-svh items-center justify-center">
+                <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+            </div>
+        )
+    }
+
+    if (!user) {
+        return <LoginPage onAuth={handleAuth} />
+    }
+
+    const studentId = user.studentId
 
     return (
         <div className="mx-auto flex min-h-svh max-w-7xl flex-col gap-8 px-4 py-6 sm:px-6 lg:px-8">

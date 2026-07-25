@@ -1,0 +1,19 @@
+services:
+  kurzoz-backend:
+    build: ./backend
+    container_name: kurzoz-backend
+    restart: unless-stopped
+    env_file:
+      - ./backend/.env
+    ports:
+      - "4000:4000"
+
+  kurzoz-frontend:
+    build:
+      context: ./frontend
+      args:
+        VITE_API_URL: ${VITE_API_URL:-https://kurzoz.devteamaadj.xyz/api}
+    container_name: kurzoz-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:80"

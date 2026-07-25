@@ -26,7 +26,7 @@ class HistorialModel {
     static async replaceEnrollments(client, studentId, enrollments) {
         await client.query('DELETE FROM student_enrollment WHERE student_id = $1', [studentId])
         if (enrollments.length === 0) return
-        const values = buildValues(enrollments, 8)
+        const values = buildValues(enrollments, 9)
         const params = enrollments.flatMap((e) => [
             studentId,
             e.code,
@@ -36,9 +36,10 @@ class HistorialModel {
             e.date,
             e.modality,
             e.professor,
+            e.group,
         ])
         await client.query(
-            `INSERT INTO student_enrollment (student_id, course_code, semester, grade, grade_text, date, modality, professor)
+            `INSERT INTO student_enrollment (student_id, course_code, semester, grade, grade_text, date, modality, professor, group_label)
              VALUES ${values}`,
             params,
         )
