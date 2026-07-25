@@ -2,9 +2,8 @@ import { useState, useEffect } from 'react'
 import EstadoPage from './domains/academico/estudiante/pages/EstadoPage.jsx'
 import HorarioPage from './domains/academico/horario/pages/HorarioPage.jsx'
 import GrafoPage from './domains/academico/grafo/pages/GrafoPage.jsx'
-import LoginPage from './domains/auth/pages/LoginPage.jsx'
-import { getToken, setUser, clearSession } from './infrastructure/session.js'
-import { fetchMe } from './domains/auth/api/authApi.js'
+import DireccionDisponibilidadPage from './domains/direccion/disponibilidad/pages/DireccionDisponibilidadPage.jsx'
+import DireccionPlanificadorPage from './domains/direccion/planificador/pages/DireccionPlanificadorPage.jsx'
 
 const DEFAULT_OBJETIVOS = {
     term: '2026-II',
@@ -69,26 +68,13 @@ function App() {
                         Planificador de horarios · Ingeniería de Sistemas UNHEVAL · {studentId}
                     </p>
                 </div>
-                <div className="flex items-center gap-3">
-                    <nav className="flex gap-1 rounded-xl border border-border bg-surface p-1 shadow-sm">
-                        <Tab active={view === 'estado'} onClick={() => setView('estado')}>
-                            Estado y objetivos
-                        </Tab>
-                        <Tab active={view === 'horario'} onClick={() => setView('horario')}>
-                            Horario ideal
-                        </Tab>
-                        <Tab active={view === 'grafo'} onClick={() => setView('grafo')}>
-                            Mi situación
-                        </Tab>
-                    </nav>
-                    <button
-                        type="button"
-                        onClick={handleLogout}
-                        className="rounded-lg border border-border px-3 py-2 text-xs font-medium text-text-secondary transition-colors hover:bg-surface-hover hover:text-text-primary"
-                    >
-                        Salir
-                    </button>
-                </div>
+                <nav className="flex gap-1 rounded-lg border border-border bg-surface p-1">
+                    <Tab active={view === 'estado'} onClick={() => setView('estado')}>Estado y objetivos</Tab>
+                    <Tab active={view === 'horario'} onClick={() => setView('horario')}>Horario ideal</Tab>
+                    <Tab active={view === 'grafo'} onClick={() => setView('grafo')}>Mi situación</Tab>
+                    <Tab active={view === 'disponibilidad'} onClick={() => setView('disponibilidad')}>Disponibilidad</Tab>
+                    <Tab active={view === 'planificador'} onClick={() => setView('planificador')}>Planificador</Tab>
+                </nav>
             </header>
 
             <main className="flex-1">
@@ -111,6 +97,9 @@ function App() {
                 {view === 'grafo' && (
                     <GrafoPage key={studentId} studentId={studentId} term={objetivos.term} />
                 )}
+                {view === 'grafo' && <GrafoPage key={studentId} studentId={studentId} term={objetivos.term} />}
+                {view === 'disponibilidad' && <DireccionDisponibilidadPage />}
+                {view === 'planificador' && <DireccionPlanificadorPage />}
             </main>
 
             <footer className="border-t border-border py-4 text-center text-xs text-text-muted">
