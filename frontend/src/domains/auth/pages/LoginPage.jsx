@@ -46,7 +46,7 @@ export default function LoginPage({ onAuth }) {
                             type="text"
                             value={studentId}
                             onChange={(e) => setStudentId(e.target.value)}
-                            placeholder="Ej: 2023110208"
+                            placeholder="Ej: 2023110000"
                             required
                             className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm transition-colors placeholder:text-text-muted focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                         />
