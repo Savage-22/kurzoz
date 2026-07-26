@@ -1,4 +1,7 @@
 import { useState, useEffect } from 'react'
+import { getToken, setUser, clearSession } from './infrastructure/session.js'
+import { fetchMe } from './domains/auth/api/authApi.js'
+import LoginPage from './domains/auth/pages/LoginPage.jsx'
 import EstadoPage from './domains/academico/estudiante/pages/EstadoPage.jsx'
 import HorarioPage from './domains/academico/horario/pages/HorarioPage.jsx'
 import GrafoPage from './domains/academico/grafo/pages/GrafoPage.jsx'
@@ -97,7 +100,6 @@ function App() {
                 {view === 'grafo' && (
                     <GrafoPage key={studentId} studentId={studentId} term={objetivos.term} />
                 )}
-                {view === 'grafo' && <GrafoPage key={studentId} studentId={studentId} term={objetivos.term} />}
                 {view === 'disponibilidad' && <DireccionDisponibilidadPage />}
                 {view === 'planificador' && <DireccionPlanificadorPage />}
             </main>
