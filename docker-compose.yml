@@ -6,7 +6,7 @@ services:
     env_file:
       - ./backend/.env
     ports:
-      - "4000:4000"
+      - "6000:4000"
 
   kurzoz-frontend:
     build:
@@ -16,4 +16,4 @@ services:
     container_name: kurzoz-frontend
     restart: unless-stopped
     ports:
-      - "3000:80"
+      - "3002:80"
