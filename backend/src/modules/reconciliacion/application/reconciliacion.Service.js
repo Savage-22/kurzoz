@@ -13,7 +13,7 @@ class ReconciliacionService {
             [studentId],
         )
         if (rows.length === 0) {
-            throw new Error(`El alumno ${studentId} no tiene avance importado; corre import:avance primero.`)
+            return { studentId, avanceCount: 0, excelCount: 0, compared: 0, agreements: 0, discrepancies: [], noConvalidados: [] }
         }
         const avanceByCode = new Map(rows.map((r) => [r.course_code, r.status]))
 

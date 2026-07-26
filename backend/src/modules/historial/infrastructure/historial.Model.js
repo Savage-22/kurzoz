@@ -45,6 +45,19 @@ class HistorialModel {
         )
     }
 
+    // Normaliza modalidad del historial a los valores del CHECK de student_course
+    static normalizeModality(modality) {
+        if (!modality) return null
+        const map = {
+            'REGULAR': 'REGULAR',
+            'CONVALIDACION': 'CONVALIDADO',
+            'DIRIGIDO-MOVILIDAD': 'REGULAR',
+            'CURSO DE VERANO': 'VACACIONAL',
+            'CONVALIDACION POR PASANTIA': 'CONVALIDADO',
+        }
+        return map[modality] ?? null
+    }
+
     // También actualiza student_course con los datos más recientes del historial.
     static async updateStudentCoursesFromEnrollments(client, studentId, enrollments) {
         // Tomar la nota más reciente por curso (basado en la fecha)
@@ -66,7 +79,7 @@ class HistorialModel {
             code: e.code,
             status: e.grade >= 11 ? 'APROBADO' : 'PENDIENTE',
             grade: e.grade,
-            modality: e.modality,
+            modality: HistorialModel.normalizeModality(e.modality),
         }))
 
         const values = buildValues(courses, 5)
