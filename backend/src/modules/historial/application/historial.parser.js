@@ -58,7 +58,7 @@ const parseCourseRow = (cells) => {
     const groupCell = after.find((c) => GROUP.test(c.text))
     const creditsCell = after.find((c) => CREDITS.test(c.text))
     const gradeTextCell = after.find((c) => GRADE_TEXT.test(c.text))
-    const gradeCell = after.find((c) => GRADE.test(c.text) && !GRADE_TEXT.test(c.text))
+    const gradeCell = after.filter((c) => c !== creditsCell).find((c) => GRADE.test(c.text) && !GRADE_TEXT.test(c.text))
     const dateCell = after.find((c) => DATE.test(c.text))
 
     // Detectar modalidad de las celdas restantes

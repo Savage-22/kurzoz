@@ -2,6 +2,7 @@
 // el sobre) y delegan errores con next(). Sin lógica de negocio.
 import MotorService from '../motor.Service.js'
 import { formatSolicitud } from '../application/adjustments.js'
+import pool from '../../../shared/db/pool.js'
 
 const DEFAULT_TERM = '2026-II'
 
@@ -34,6 +35,27 @@ class MotorController {
             const term = req.query.term || DEFAULT_TERM
             const data = await MotorService.getGraph(req.params.id, term)
             res.status(200).json({ success: true, message: 'Grafo de prerrequisitos generado', data })
+        } catch (error) {
+            next(error)
+        }
+    }
+
+    // PATCH /students/:id/courses/:code/status
+    static async markCourseStatus(req, res, next) {
+        try {
+            const { id: studentId, code } = req.params
+            const { status } = req.body
+            if (!['APROBADO', 'EN_CURSO', 'PENDIENTE'].includes(status)) {
+                return res.status(400).json({ success: false, message: 'Estado inválido' })
+            }
+            await pool.query(
+                `INSERT INTO student_course (student_id, course_code, status, grade, modality)
+                 VALUES ($1, $2, $3, NULL, NULL)
+                 ON CONFLICT (student_id, course_code)
+                 DO UPDATE SET status = EXCLUDED.status, grade = EXCLUDED.grade`,
+                [studentId, code, status],
+            )
+            res.status(200).json({ success: true, message: `Curso ${code} marcado como ${status}` })
         } catch (error) {
             next(error)
         }

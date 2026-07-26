@@ -28,6 +28,10 @@ export const previewAvance = (studentId, file) => {
     })
 }
 
+// Marcar un curso como APROBADO/EN_CURSO manualmente
+export const markCourseStatus = (studentId, courseCode, status) =>
+    httpClient.patch(`/students/${studentId}/courses/${courseCode}/status`, { status })
+
 // Upload de historial de notas (PDF)
 export const uploadHistorial = (studentId, file) => {
     const formData = new FormData()

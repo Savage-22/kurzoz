@@ -28,7 +28,7 @@ const parseCourseRow = (cells) => {
     const after = sorted.slice(codeIndex + 1)
 
     const creditsCell = after.find((c) => CREDITS.test(c.text))
-    const gradeCell = after.find((c) => GRADE.test(c.text))
+    const gradeCell = after.filter((c) => c !== creditsCell).find((c) => GRADE.test(c.text))
     const dateCell = after.find((c) => DATE.test(c.text))
     const typeCell = after.find((c) => TYPE[c.text.toUpperCase()])
 

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { getDiscrepancies, getRemaining } from '../services/estudianteService.js'
+import { getDiscrepancies, getRemaining, approveCourse } from '../services/estudianteService.js'
 import FaltantesList from '../components/FaltantesList.jsx'
 import ObjetivosForm from '../components/ObjetivosForm.jsx'
 import DiscrepanciasAviso from '../components/DiscrepanciasAviso.jsx'
@@ -91,7 +91,13 @@ function EstadoPage({ studentId, objetivos, onObjetivosChange, onGenerate }) {
                         </p>
                     </div>
                 ) : (
-                    <FaltantesList data={remaining} />
+                    <FaltantesList
+                        data={remaining}
+                        studentId={studentId}
+                        onCourseApproved={(code) => {
+                            approveCourse(studentId, code).then(() => loadData())
+                        }}
+                    />
                 )}
             </section>
 

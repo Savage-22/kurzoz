@@ -1,5 +1,5 @@
 // Lista los cursos faltantes agrupados por ciclo, con su paridad y tipo.
-function FaltantesList({ data }) {
+function FaltantesList({ data, studentId, onCourseApproved }) {
     if (!data) {
         return (
             <div className="flex items-center justify-center py-12">
@@ -64,6 +64,16 @@ function FaltantesList({ data }) {
                                         >
                                             {c.type === 'OBL' ? 'Obligatorio' : 'Electivo'}
                                         </span>
+                                        {studentId && (
+                                            <button
+                                                type="button"
+                                                onClick={() => onCourseApproved?.(c.code)}
+                                                className="rounded-md border border-success bg-success-soft px-2 py-1 text-[10px] font-semibold text-success transition-colors hover:bg-success hover:text-white"
+                                                title="Marcar como curso ya llevado"
+                                            >
+                                                Lo llevé
+                                            </button>
+                                        )}
                                     </div>
                                 </li>
                             ))}

@@ -71,13 +71,23 @@ function App() {
                         Planificador de horarios · Ingeniería de Sistemas UNHEVAL · {studentId}
                     </p>
                 </div>
-                <nav className="flex gap-1 rounded-lg border border-border bg-surface p-1">
-                    <Tab active={view === 'estado'} onClick={() => setView('estado')}>Estado y objetivos</Tab>
-                    <Tab active={view === 'horario'} onClick={() => setView('horario')}>Horario ideal</Tab>
-                    <Tab active={view === 'grafo'} onClick={() => setView('grafo')}>Mi situación</Tab>
-                    <Tab active={view === 'disponibilidad'} onClick={() => setView('disponibilidad')}>Disponibilidad</Tab>
-                    <Tab active={view === 'planificador'} onClick={() => setView('planificador')}>Planificador</Tab>
-                </nav>
+                <div className="flex items-center gap-2">
+                    <nav className="flex gap-1 rounded-lg border border-border bg-surface p-1">
+                        <Tab active={view === 'estado'} onClick={() => setView('estado')}>Estado y objetivos</Tab>
+                        <Tab active={view === 'horario'} onClick={() => setView('horario')}>Horario ideal</Tab>
+                        <Tab active={view === 'grafo'} onClick={() => setView('grafo')}>Mi situación</Tab>
+                        <Tab active={view === 'disponibilidad'} onClick={() => setView('disponibilidad')}>Disponibilidad</Tab>
+                        <Tab active={view === 'planificador'} onClick={() => setView('planificador')}>Planificador</Tab>
+                    </nav>
+                    <button
+                        type="button"
+                        onClick={handleLogout}
+                        className="rounded-lg border border-error bg-error-soft px-3 py-2 text-xs font-semibold text-error transition-colors hover:bg-error hover:text-white"
+                        title="Cerrar sesión"
+                    >
+                        Salir
+                    </button>
+                </div>
             </header>
 
             <main className="flex-1">

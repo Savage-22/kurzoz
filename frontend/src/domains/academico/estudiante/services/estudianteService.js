@@ -1,4 +1,4 @@
-import { fetchDiscrepancies, fetchRemaining } from '../api/estudianteApi.js'
+import { fetchDiscrepancies, fetchRemaining, markCourseStatus } from '../api/estudianteApi.js'
 
 // Normaliza el estado del alumno para la UI. Los componentes consumen esto,
 // nunca la API directa.
@@ -6,6 +6,9 @@ export const getRemaining = async (studentId) => {
     const { data } = await fetchRemaining(studentId)
     return data.data
 }
+
+export const approveCourse = (studentId, courseCode) =>
+    markCourseStatus(studentId, courseCode, 'APROBADO').then((r) => r.data)
 
 // Discrepancias del reporte de reconciliación (#6). Si el Excel no está en el
 // servidor o algo falla, se devuelve vacío para que el aviso simplemente no salga.
